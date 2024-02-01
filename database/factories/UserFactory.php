@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -11,10 +13,7 @@ use Illuminate\Support\Str;
  */
 class UserFactory extends Factory
 {
-    /**
-     * The current password being used by the factory.
-     */
-    protected static ?string $password;
+    public const DEFAULT_PASSWORD = 'password';
 
     /**
      * Define the model's default state.
@@ -27,8 +26,9 @@ class UserFactory extends Factory
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
+            'password' => Hash::make(static::DEFAULT_PASSWORD),
             'remember_token' => Str::random(10),
+            'company_logo' => fake()->filePath(),
         ];
     }
 
@@ -37,8 +37,16 @@ class UserFactory extends Factory
      */
     public function unverified(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
-        ]);
+        return $this->state(fn (array $attributes) => ['email_verified_at' => null]);
+    }
+
+    public function withAvatar(?string $path = null): static
+    {
+        return $this->state(fn (array $attributes) => ['avatar' => $path ?? fake()->filePath()]);
+    }
+
+    public function withCompanyLogo(string $path): static
+    {
+        return $this->state(fn (array $attributes) => ['company_logo' => $path]);
     }
 }
