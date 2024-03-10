@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Exceptions\CascadableFileAttributesNotSet;
+use App\Models\Event;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
@@ -55,6 +57,18 @@ describe('on model update', function () {
 
         Storage::shouldHaveReceived('delete')->once()->with([$oldCompanyLogo, $oldAvatar]);
     });
+
+    test('it throws exception if cascadable file attributes are not set', function () {
+        Storage::spy();
+
+        $event = Event::factory()->create();
+
+        $event->update(['preview_img' => $newPreviewImg = fake()->filePath()]);
+
+        expect($event->preview_img)->toBe($newPreviewImg);
+
+        Storage::shouldHaveNotReceived('delete');
+    })->throws(CascadableFileAttributesNotSet::class);
 });
 
 describe('on model delete', function () {
@@ -97,4 +111,16 @@ describe('on model delete', function () {
 
         Storage::shouldHaveReceived('delete')->once()->with([$previewImg]);
     });
+
+    test('it throws exception if cascadable file attributes are not set', function () {
+        Storage::spy();
+
+        $event = Event::factory()->create();
+
+        $event->delete();
+
+        $this->assertModelMissing($event);
+
+        Storage::shouldHaveNotReceived('delete');
+    })->throws(CascadableFileAttributesNotSet::class);
 });
