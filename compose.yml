@@ -1,0 +1,35 @@
+version: "3"
+
+networks:
+    laravel:
+        driver: bridge
+
+services:
+    php:
+        container_name: php
+        build:
+            context: .
+        image: cascade_files_php:latest
+        environment:
+            PHP_IDE_CONFIG: "serverName=laravel"
+        extra_hosts:
+            - "host.docker.internal:host-gateway"
+        volumes:
+            - ./:/var/www/html
+            - ./.platform/php/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+            - ./.platform/php/error_reporting.ini:/usr/local/etc/php/conf.d/error_reporting.ini
+            - ./.platform/php/opcache.local.ini:/usr/local/etc/php/conf.d/opcache.ini
+        networks:
+            - laravel
+    nginx:
+        container_name: nginx
+        image: nginx:stable-alpine
+        depends_on:
+            - php
+        ports:
+            - "80:80"
+        volumes:
+            - ./:/var/www/html
+            - ./.platform/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
+        networks:
+            - laravel
