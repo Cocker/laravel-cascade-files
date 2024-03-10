@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
  */
 class UserFactory extends Factory
 {
-    public const DEFAULT_PASSWORD = 'password';
+    public final const string DEFAULT_PASSWORD = 'password';
 
     /**
      * Define the model's default state.
